@@ -35,7 +35,7 @@ if (isMac()) {
 task downloadMpsAndPluginsFromJetbrains {
     group 'mps-download'
     onlyIf {
-        !mpsZipFile.exists() || mpsPlugins.any { !file("$pluginsDirectory/mps-${it.key}.zip").exists() }
+        !mpsZipFile.exists() || mpsPlugins.any { !file("$pluginsDirectory/mps-${getEffectivePluginName(it.key)}.zip").exists() }
     }
     doLast {
         if (!mpsZipFile.exists()) {
@@ -46,19 +46,21 @@ task downloadMpsAndPluginsFromJetbrains {
         }
 
         def mpsPluginDependencies = mpsPlugins.collectMany {
-            def pluginName = it.key
+            def pluginName = getEffectivePluginName(it.key)
             def pluginId = it.value
-            collectDependencies(getEffectivePluginName(pluginName), pluginId, getEffectivePluginVersion(pluginName, mpsVersion)).entrySet()
+            def pluginVersion = getEffectivePluginVersion(it.key, mpsVersion)
+            collectDependencies(pluginName, pluginId, pluginVersion).entrySet()
         }
         mpsPlugins.putAll(mpsPluginDependencies)
 
         mpsPlugins.each {
-            def pluginName = it.key
+            def pluginName = getEffectivePluginName(it.key)
             def pluginId = it.value
+            def pluginVersion = getEffectivePluginVersion(it.key, mpsVersion)
             def pluginZipFile = file("$pluginsDirectory/mps-${pluginName}.zip")
             if (!pluginZipFile.exists()) {
                 pluginZipFile.parentFile.mkdirs()
-                def pluginDownloadLink = obtainDownloadLinkForPlugin(getEffectivePluginName(pluginName), pluginId, getEffectivePluginVersion(pluginName, mpsVersion))
+                def pluginDownloadLink = obtainDownloadLinkForPlugin(pluginName, pluginId, pluginVersion)
                 println("downloading $pluginDownloadLink ... ($pluginName)")
                 new URL(pluginDownloadLink).withInputStream { downloadInputStream -> pluginZipFile.withOutputStream { it << downloadInputStream } }
             }
@@ -273,11 +275,14 @@ task listPlugins {
     doLast {
         def primaryPlugins = mpsPlugins.keySet()
         def mpsPluginDependencies = mpsPlugins.collectMany {
-            collectDependencies(it.key, it.value, mpsVersion).keySet()
-        }.findAll { !primaryPlugins.contains(it) }
+            def pluginName = getEffectivePluginName(it.key)
+            def pluginId = it.value
+            def pluginVersion = getEffectivePluginVersion(it.key, mpsVersion)
+            collectDependencies(pluginName, pluginId, pluginVersion).keySet()
+        }.findAll { !primaryPlugins.contains(getEffectivePluginName(it)) }
 
         println("============ Bundled Plugins ============")
-        primaryPlugins.each { println("plugin '$it'") }
+        primaryPlugins.each { println("plugin '${getEffectivePluginName(it)}'") }
         println("============= Dependencies ==============")
         mpsPluginDependencies.each { println("required dependency '$it'") }
     }

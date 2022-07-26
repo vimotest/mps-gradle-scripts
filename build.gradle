@@ -9,7 +9,8 @@ ext.mpsVersion = "2021.2.4"
 // if you need a specific version for a plugin, add it in []-brackets
 ext.mpsPlugins = [ "de.itemis.mps.extensions.build": 17136,
                    "de.itemis.mps.grammarcells": 13242,
-                   "LangDoc[2021.2]": 12325]
+                   "LangDoc[2021.2]": 12325,
+                   "mps-table-editor-component[2021.2]": 13255]
 
 apply from: 'gradle/download-mps.gradle'
 apply from: 'gradle/run-mps-ant.gradle'
