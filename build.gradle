@@ -1,0 +1,51 @@
+/*
+  This is an example file, which demonstrates how the gradle helper scripts can be used
+ */
+
+ext.mpsVersion = "2021.2.4"
+ext.mpsPlugins = [ "de.itemis.mps.extensions.build": 17136,
+                   "de.itemis.mps.grammarcells": 13242 ]
+
+apply from: 'gradle/download-mps.gradle'
+apply from: 'gradle/run-mps-ant.gradle'
+
+task prepareMps {
+    group 'mps'
+    dependsOn buildOsSpecificBundle
+}
+
+task mpsBuild {
+    group 'mps'
+    dependsOn 'mpsAntGenerate', 'mpsAntBuild'
+}
+
+task mpsClean {
+    group 'mps'
+    dependsOn 'mpsAntCleanSources'
+}
+
+task mpsTest {
+    group 'mps'
+    dependsOn 'mpsAntCheck', 'parseTestReportAfterAntCheck'
+}
+
+import org.apache.tools.ant.taskdefs.condition.Os
+task openProjectInMps(type: Exec) {
+    group 'mps'
+    dependsOn prepareMps
+
+    workingDir projectDir
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        commandLine 'build/mps-bundle/mps/bin/mps.bat', projectDir
+    } else if (Os.isFamily(Os.FAMILY_MAC)) {
+        commandLine 'build/mps-bundle/Contents/MacOS/mps', projectDir
+    } else if (Os.isFamily(Os.FAMILY_UNIX)) {
+        commandLine 'sh', 'build/mps-bundle/mps/bin/mps.sh', projectDir
+    }
+}
+
+task buildAndOpenProjectInMps(type: Exec) {
+    group 'mps'
+    dependsOn mpsBuild, openProjectInMps
+}
