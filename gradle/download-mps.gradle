@@ -46,7 +46,9 @@ task downloadMpsAndPluginsFromJetbrains {
         }
 
         def mpsPluginDependencies = mpsPlugins.collectMany {
-            collectDependencies(it.key, it.value, mpsVersion).entrySet()
+            def pluginName = it.key
+            def pluginId = it.value
+            collectDependencies(getEffectivePluginName(pluginName), pluginId, getEffectivePluginVersion(pluginName, mpsVersion)).entrySet()
         }
         mpsPlugins.putAll(mpsPluginDependencies)
 
@@ -56,12 +58,36 @@ task downloadMpsAndPluginsFromJetbrains {
             def pluginZipFile = file("$pluginsDirectory/mps-${pluginName}.zip")
             if (!pluginZipFile.exists()) {
                 pluginZipFile.parentFile.mkdirs()
-                def pluginDownloadLink = obtainDownloadLinkForPlugin(pluginName, pluginId, mpsVersion)
+                def pluginDownloadLink = obtainDownloadLinkForPlugin(getEffectivePluginName(pluginName), pluginId, getEffectivePluginVersion(pluginName, mpsVersion))
                 println("downloading $pluginDownloadLink ... ($pluginName)")
                 new URL(pluginDownloadLink).withInputStream { downloadInputStream -> pluginZipFile.withOutputStream { it << downloadInputStream } }
             }
         }
     }
+}
+
+/*
+  Returns the pluginName,
+  or if required, removes the version from the configuredPluginName (e.g. 'LangDoc[2021.2]' -> 'LangDoc')
+ */
+private static String getEffectivePluginName(String configuredPluginName) {
+    def indexOfVersionBrackets = configuredPluginName.indexOf("[")
+    if (indexOfVersionBrackets >= 0) {
+        return configuredPluginName.substring(0, indexOfVersionBrackets)
+    }
+    return configuredPluginName
+}
+
+/*
+  Returns the mpsVersion,
+  or if available, extracts the version from the configuredPluginName (e.g. 'LangDoc[2021.2]' -> '2021.2')
+ */
+private static String getEffectivePluginVersion(String configuredPluginName, String mpsVersion) {
+    def indexOfVersionBrackets = configuredPluginName.indexOf("[")
+    if (indexOfVersionBrackets >= 0) {
+        return configuredPluginName.substring(indexOfVersionBrackets+1, configuredPluginName.size()-1)
+    }
+    return mpsVersion
 }
 
 task buildMpsZipBundle {
@@ -133,13 +159,19 @@ private static Map<String, Integer> collectDependencies(String pluginName, int p
 }
 
 private static String obtainUpdateIdForPlugin(String pluginName, int pluginId, String version) {
-    def response = new URL("https://plugins.jetbrains.com/api/plugins/$pluginId/updates?channel=&version=$version").text
+    def url = new URL("https://plugins.jetbrains.com/api/plugins/$pluginId/updates?channel=&version=$version")
+    def response = url.text
     if (response.contains("statusCode\":404")) {
         throw new RuntimeException("couldn't find plugin $pluginName for MPS version $version, please ensure that it exists in the target version")
     }
 
-    def json = new JsonSlurper().parseText(response)
-    return json[0].id
+    try {
+        def json = new JsonSlurper().parseText(response)
+        return json[0].id
+    } catch (Exception e) {
+        println("ERROR: couldn't retrieve the plugin $pluginName ($pluginId) with the url: $url")
+        throw e
+    }
 }
 
 task downloadJbrForCurrentPlatform {
