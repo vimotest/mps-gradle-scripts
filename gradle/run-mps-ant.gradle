@@ -102,3 +102,18 @@ private static String getMpsHome() {
     }
     return 'build/mps-bundle/mps'
 }
+
+task openProjectInMpsForCurrentOs(type: Exec) {
+    group 'mps-ant-wrapper'
+    dependsOn buildOsSpecificBundle
+
+    workingDir projectDir
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        commandLine 'build/mps-bundle/mps/bin/mps.bat', projectDir
+    } else if (Os.isFamily(Os.FAMILY_MAC)) {
+        commandLine 'build/mps-bundle/Contents/MacOS/mps', projectDir
+    } else if (Os.isFamily(Os.FAMILY_UNIX)) {
+        commandLine 'sh', 'build/mps-bundle/mps/bin/mps.sh', projectDir
+    }
+}
