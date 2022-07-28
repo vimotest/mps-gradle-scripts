@@ -128,10 +128,11 @@ task buildMpsZipBundle {
 }
 
 private void addLocalPluginsPathToVmOptions(String targetFolderName) {
-    println("> adding -Didea.plugins.path=../.plugins to bin/*.vmoptions")
+    def dependenciesPath = "${file("$targetFolderName/../dependencies").absolutePath}"
+    println("> adding -Didea.plugins.path=$dependenciesPath to bin/*.vmoptions")
     fileTree(dir: file("$targetFolderName/bin"), includes: ['*.vmoptions'])
             .each {
-                it.append("-Didea.plugins.path=../.plugins\n")
+                it.append("-Didea.plugins.path=$dependenciesPath\n")
             }
 }
 
