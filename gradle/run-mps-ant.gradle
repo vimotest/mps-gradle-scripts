@@ -109,6 +109,8 @@ task openProjectInMpsForCurrentOs(type: Exec) {
 
     workingDir projectDir
 
+    environment "JAVA_HOME", "$projectDir/build/mps-bundle/mps/jbr/bin"
+
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         commandLine 'build/mps-bundle/mps/bin/mps.bat', projectDir
     } else if (Os.isFamily(Os.FAMILY_MAC)) {
