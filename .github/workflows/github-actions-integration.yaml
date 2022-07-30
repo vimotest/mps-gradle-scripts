@@ -1,6 +1,9 @@
 name: Integration Build
 
-on: [push]
+on:
+  push:
+    branches:
+      - '*'
 
 jobs:
   call-build-workflow:
