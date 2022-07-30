@@ -1,0 +1,7 @@
+name: Integration Build
+
+on: [push]
+
+jobs:
+  call-build-workflow:
+    uses: ./.github/workflows/workflow-build.yaml
