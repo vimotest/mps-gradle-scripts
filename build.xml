@@ -14,26 +14,25 @@
   <target name="build" depends="assemble">
     <echo message="create dummy artifacts" />
 
-    <echo file="${build.dir}/artifacts/build.properties">
+    <echo file="${build.dir}/artifacts/dummy-language/build.properties">
       this is a dummy file (build-props)
     </echo>
-    <echo file="${build.dir}/artifacts/MyDummyLanguage/languages/MyDummyLanguage/MyDummyLanguage.jar">
+    <echo file="${build.dir}/artifacts/dummy-language/MyDummyLanguage/languages/MyDummyLanguage/MyDummyLanguage.jar">
       this is a dummy file (MyDummyLanguage)
     </echo>
-    <echo file="${build.dir}/artifacts/MyDummyLanguage/languages/MyDummyLanguage/MyDummyLanguage-src.jar">
+    <echo file="${build.dir}/artifacts/dummy-language/MyDummyLanguage/languages/MyDummyLanguage/MyDummyLanguage-src.jar">
       this is a dummy file (MyDummyLanguage-src)
     </echo>
-    <echo file="${build.dir}/artifacts/MyDummyLanguage/lib/MyDummyLanguage.jar">
+    <echo file="${build.dir}/artifacts/dummy-language/MyDummyLanguage/lib/MyDummyLanguage.jar">
       this is a dummy file (MyDummyLanguage)
     </echo>
-    <echo file="${build.dir}/artifacts/MyDummyLanguage/META-INF/plugin.xml">
+    <echo file="${build.dir}/artifacts/dummy-language/MyDummyLanguage/META-INF/plugin.xml">
       this is a dummy file (plugin.xml)
     </echo>
 
-    <zip destfile="${build.dir}/artifacts/MyDummyLanguage.zip">
-      <zipfileset dir="${build.dir}/artifacts/MyDummyLanguage" prefix="MyDummyLanguage" />
+    <zip destfile="${build.dir}/artifacts/dummy-language/MyDummyLanguage.zip">
+      <zipfileset dir="${build.dir}/artifacts/dummy-language/MyDummyLanguage" prefix="MyDummyLanguage" />
     </zip>
-<!--    <zip destfile="${build.dir}/artifacts/MyDummyLanguage.zip" basedir="${build.dir}/artifacts/MyDummyLanguage"/>-->
   </target>
   
   <target name="clean">

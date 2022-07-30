@@ -20,9 +20,12 @@ task prepareMps {
     dependsOn buildOsSpecificBundle
 }
 
+ant.importBuild('build.xml') { antTargetName ->
+    'a-' + antTargetName
+}
 task mpsBuild {
     group 'mps'
-    dependsOn 'mpsAntGenerate', 'mpsAntBuild'
+    dependsOn 'a-build'
 }
 
 task mpsClean {
