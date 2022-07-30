@@ -35,3 +35,11 @@ jobs:
       # Stop Xvfb
       - name: Tear down xvfb
         run: killall Xvfb
+
+      # Upload Artifacts
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            build/artifacts/*/*.zip
