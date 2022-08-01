@@ -1,0 +1,23 @@
+def scripts = ["download-mps.gradle", "run-mps-ant.gradle", "init-gradle-scripts.gradle"]
+
+scripts.each {
+    if (file(it).exists() && it != "init-gradle-scripts.gradle") {
+        apply from: it
+    }
+}
+
+task downloadGradleScripts {
+    group 'mps-gradle'
+
+    doLast {
+        scripts.each {
+            def gradleScriptFile = file("$projectDir/gradle/$it")
+            gradleScriptFile.parentFile.mkdirs()
+            def url = new URL("https://github.com/vimotest/mps-gradle-scripts/raw/main/gradle/$it")
+            url.withInputStream {
+                inputStream -> gradleScriptFile.withOutputStream { outputStream -> outputStream << inputStream }
+            }
+            gradleScriptFile.text = "/* This file is downloaded from $url */\n\n${gradleScriptFile.text}"
+        }
+    }
+}
