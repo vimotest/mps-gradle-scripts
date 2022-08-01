@@ -22,3 +22,23 @@ task downloadGradleScripts {
         }
     }
 }
+
+def githubActionsFiles = ["github-actions-integration.yaml", "github-actions-release.yaml", "workflow-build.yaml"]
+task downloadGithubActionsScripts {
+    group 'mps-gradle'
+
+    doLast {
+        githubActionsFiles.each {
+            def actionsFile = file("$projectDir/.github/workflows/$it")
+            actionsFile.parentFile.mkdirs()
+            def url = new URL("https://github.com/vimotest/mps-gradle-scripts/raw/main/.github/workflows/$it")
+            url.withInputStream {
+                inputStream -> actionsFile.withOutputStream { outputStream -> outputStream << inputStream }
+            }
+            actionsFile.text = "/* This file is downloaded from $url */\n\n${actionsFile.text}"
+            actionsFile.text = actionsFile.text
+                    .replaceAll("PROJECT_NAME: \"dummy-language\"", "PROJECT_NAME: \"$project.name\"")
+                    .replaceAll("LANGUAGE_NAME: \"MyDummyLanguage\"", "LANGUAGE_NAME: \"MyLanguage\"")
+        }
+    }
+}
