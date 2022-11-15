@@ -6,8 +6,8 @@ It is intended to copy the related files into your own repo, or include them by 
 
 ## Setup new Project
 
-* create a new directory for your project (e.g. `mps-gradle-setup-sample/`)
-* copy files/directories 
+* create a new directory for your project (e.g. `MySetupSample/`)
+* copy files/directories
   - folders `.github`, `gradle`
   - files `build.gradle`, `build.xml`, `gradle.properties`, `gradlew`, `gradlew.bat`
 * adapt `build.gradle`
@@ -19,7 +19,7 @@ It is intended to copy the related files into your own repo, or include them by 
   - note: ensure that no other MPS instance is running
 * in MPS: create a new project
   - set project name (e.g. `MySetupSample`)
-  - set project location to your project directory (e.g. `<path-to-projects>\mps-gradle-setup-sample`)
+  - set project location to your project directory (e.g. `<path-to-projects>\MySetupSample`)
   - set language name (e.g. `MySetupSampleLanguage`)
 * in MPS: create a new build module
   - right click on project: `New/Build Solution`
