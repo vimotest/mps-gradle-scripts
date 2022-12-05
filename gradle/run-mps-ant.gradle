@@ -29,6 +29,12 @@ task mpsAntCheck(type: Exec) {
     commandLine "$javaHome/bin/java", "-classpath", antLauncherJarPath, "-Dmps_home=$mpsHome", "-Dproject_home=$projectDir", "org.apache.tools.ant.launch.Launcher", "-cp", mpsUtilJarPath, "check"
 }
 
+task mpsAntCommand(type: Exec) {
+    group 'mps-ant-wrapper'
+    description 'Run <antCmd> using ant. Example: gradlew mpsAntCommand -PantCmd=clean'
+    commandLine "$javaHome/bin/java", "-classpath", antLauncherJarPath, "-Dmps_home=$mpsHome", "-Dproject_home=$projectDir", "org.apache.tools.ant.launch.Launcher", "-cp", mpsUtilJarPath, findProperty('antCmd') ?: '-p'
+}
+
 task parseTestReportAfterAntCheck {
     group 'mps-ant-wrapper'
     dependsOn mpsAntCheck
