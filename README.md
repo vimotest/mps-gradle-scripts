@@ -34,6 +34,7 @@ It is intended to copy the related files into your own repo, or include them by 
       ```
     * change the `zip` archive name of the `default layout` section to the language name (e.g. to `MySetupSampleLanguage.zip`)
       - this is necessary if language-name != project-name
+    * Build the build model: Right-Click -> Make Solution
 * execute `gradlew downloadGithubActionsScripts`
   - this re-downloads the github-action scripts and replaces the placeholders
 * execute `gradlew mpsBuild`
