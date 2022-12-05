@@ -90,7 +90,7 @@ private List<File> collectGeneratedDirs(File baseDir) {
 
 private static String getJavaHome() {
     def mpsHome = getMpsHome()
-    if (System.env['PREINSTALLED_JAVA_PATH'] != "") {
+    if (System.env.getOrDefault('PREINSTALLED_JAVA_PATH', "") != "") {
         return System.env['PREINSTALLED_JAVA_PATH']
     }
     if (Os.isFamily(Os.FAMILY_MAC)) {
