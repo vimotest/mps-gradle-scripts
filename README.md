@@ -52,6 +52,11 @@ It is intended to copy the related files into your own repo, or include them by 
 * Note: ensure you commit before executing this tasks, since they overwrite the files
   - usually, you should not modify the base scripts at all
 
+## Using preinstalled JDK
+
+If you prefer to use a preinstalled JDK, you can set the environment variable `PREINSTALLED_JAVA_PATH`.
+However, it is advised to use JetBrains JBR and preferably the right version of it (see <https://github.com/JetBrains/JetBrainsRuntime/tree/jbr11#releases>).
+
 ## Example repositories
 
 * https://github.com/vimotest/viewmodel-testlang-prototype
