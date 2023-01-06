@@ -38,7 +38,7 @@ It is intended to copy the related files into your own repo, or include them by 
 * execute `gradlew downloadGithubActionsScripts`
   - this re-downloads the github-action scripts and replaces the placeholders
 * execute `gradlew mpsBuild`
-  - this should build the archive "build/artifacts/<projectName>/<projectName>.zip" successfully
+  - this should build the archive "build/artifacts/\<projectName>/\<projectName>.zip" successfully
 
 ## Integrate into existing Project
 
