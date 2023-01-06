@@ -38,7 +38,9 @@ if (isMac()) {
 task downloadMpsAndPlugins {
     group 'mps-download'
     onlyIf {
-        !mpsZipFile.exists() || mpsPlugins.any { !file("$pluginsDirectory/mps-${getEffectivePluginName(it.key)}.zip").exists() }
+        !mpsZipFile.exists() ||
+        mpsPlugins.any { !file("$pluginsDirectory/mps-${getEffectivePluginName(it.key)}.zip").exists() } ||
+        project.hasProperty("customMpsPlugins") && customMpsPlugins.any { !file("$pluginsDirectory/mps-${it.key}.zip").exists() }
     }
     doLast {
         if (!mpsZipFile.exists()) {
