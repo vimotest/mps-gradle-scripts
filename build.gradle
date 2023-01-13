@@ -12,6 +12,7 @@ ext.mpsPlugins = [ "LangDoc[2021.2]": 12325 ]
 
 // alternative way to add itemis plugins directly from JetBrains plugin repository
 /*ext.mpsPlugins = [ "de.itemis.mps.extensions.build": 17136,
+                     "de.slisson.mps.editor.multiline" : 13253,
                      "de.itemis.mps.grammarcells": 13242 ]*/
 
 // add plugins from custom URLs (which are not available in JetBrains' plugin repository)
