@@ -22,6 +22,7 @@ task mpsAntGenerate(type: Exec) {
 task mpsAntBuild(type: Exec) {
     group 'mps-ant-wrapper'
     commandLine "$javaHome/bin/java", "-classpath", antLauncherJarPath, "-Dmps_home=$mpsHome", "-Dproject_home=$projectDir", "org.apache.tools.ant.launch.Launcher", "-cp", mpsUtilJarPath, "build"
+    mustRunAfter mpsAntGenerate
 }
 
 task mpsAntCheck(type: Exec) {
