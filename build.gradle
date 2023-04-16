@@ -35,7 +35,7 @@ task mpsBuild {
 
 task mpsClean {
     group 'mps'
-    dependsOn 'mpsAntCleanSources'
+    dependsOn 'mpsAntClean', 'mpsAntCleanSources'
 }
 
 task mpsTest {
