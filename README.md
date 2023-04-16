@@ -53,6 +53,10 @@ It is intended to copy the related files into your own repo, or include them by 
 * Note: ensure you commit before executing this tasks, since they overwrite the files
   - usually, you should not modify the base scripts at all
 
+### Breaking changes
+
+**2023-04-16**: renamed `openProjectInMpsForCurrentOs` to `mpsOpenProjectInMpsForCurrentOs`, ensure to adapt the open-tasks in your existing `build.gradle` files
+
 ## Using preinstalled JDK
 
 If you prefer to use a preinstalled JDK, you can set the environment variable `PREINSTALLED_JAVA_PATH`.

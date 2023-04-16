@@ -45,7 +45,7 @@ task mpsTest {
 
 task openProjectInMps {
     group 'mps'
-    dependsOn 'openProjectInMpsForCurrentOs'
+    dependsOn 'mpsOpenProjectInMpsForCurrentOs'
 }
 
 task buildAndOpenProjectInMps {

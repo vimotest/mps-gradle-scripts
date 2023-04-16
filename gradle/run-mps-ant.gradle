@@ -129,7 +129,7 @@ private static String concatJavaClasspath(String... paths) {
     }
 }
 
-task openProjectInMpsForCurrentOs(type: Exec) {
+task mpsOpenProjectInMpsForCurrentOs(type: Exec) {
     group 'mps-ant-wrapper'
     dependsOn buildOsSpecificBundle
 
