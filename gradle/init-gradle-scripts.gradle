@@ -20,6 +20,28 @@ task downloadGradleScripts {
             }
             gradleScriptFile.text = "/* This file is downloaded from $url */\n\n${gradleScriptFile.text}"
         }
+
+        migrateBuildGradleFileForCurrentGradleScripts()
+    }
+}
+
+// contains migration logic if gradle scripts contain breaking changes for the build.gradle file
+private def migrateBuildGradleFileForCurrentGradleScripts() {
+    def buildGradleFile = file("$projectDir/build.gradle")
+    if (!buildGradleFile.exists()) {
+        return
+    }
+    def buildGradleFileContent = buildGradleFile.text
+
+    // Issue #8: The task name openProjectInMpsForCurrentOs has the same prefix as openProjectInMps
+    buildGradleFileContent = buildGradleFileContent.replaceAll("'openProjectInMpsForCurrentOs'", "'mpsOpenProjectInMpsForCurrentOs'")
+
+    // Issue #10: mpsAntBuild should depend on mpsAntGenerate
+    buildGradleFileContent = buildGradleFileContent.replaceAll("dependsOn 'mpsAntCleanSources'", "dependsOn 'mpsAntClean', 'mpsAntCleanSources'")
+
+    if (buildGradleFile.text != buildGradleFileContent) {
+        println "Migrated build.gradle file to current gradle scripts"
+        buildGradleFile.text = buildGradleFileContent
     }
 }
 
