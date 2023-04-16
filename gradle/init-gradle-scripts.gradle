@@ -19,6 +19,7 @@ task downloadGradleScripts {
                 inputStream -> gradleScriptFile.withOutputStream { outputStream -> outputStream << inputStream }
             }
             gradleScriptFile.text = "/* This file is downloaded from $url */\n\n${gradleScriptFile.text}"
+            gradleScriptFile.text = gradleScriptFile.text.replaceAll("\r\n", "\n")
         }
 
         migrateBuildGradleFileForCurrentGradleScripts()
@@ -66,6 +67,7 @@ task downloadGithubActionsScripts {
             actionsFile.text = actionsFile.text
                     .replaceAll("PROJECT_NAME: \"dummy-language\"", "PROJECT_NAME: \"$project.name\"")
                     .replaceAll("LANGUAGE_NAME: \"MyDummyLanguage\"", "LANGUAGE_NAME: \"$languageNameForBuild\"")
+            actionsFile.text = actionsFile.text.replaceAll("\r\n", "\n")
         }
     }
 }
