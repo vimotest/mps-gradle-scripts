@@ -300,7 +300,7 @@ task copyOsSpecificBinFiles {
         file("$targetFolderName/bin/linux").deleteDir()
 
         // workaround: MPS-35648
-        if (mpsVersion == "2022.3") {
+        if (mpsVersion == "2022.3" || mpsVersion.takeBefore(".").toInteger() >= 2023) {
             def subDir = Os.isArch("aarch64") ? "aarch64" : "amd64"
             println("Workaround for UnsatisfiedLinkError with jnidispatch.dll: copying jna files from subdir $subDir to $targetFolderName/lib/jna")
             copy {
