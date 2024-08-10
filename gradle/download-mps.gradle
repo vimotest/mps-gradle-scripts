@@ -40,21 +40,34 @@ if (isMac()) {
     targetFolderName = "$outputBundleDirectory/Contents"
 }
 
-task downloadMpsAndPlugins {
+@CacheableTask
+abstract class DownloadFileTask extends DefaultTask  {
+    @Input
+    abstract Property<String> getDownloadLink()
+
+    @OutputFile
+    abstract RegularFileProperty getDownloadTargetFile()
+
+    @TaskAction
+    void downloadFile() {
+        getDownloadTargetFile().get().asFile.parentFile.mkdirs()
+        println("downloading ${getDownloadLink().get()} ... (to ${getDownloadTargetFile().get().asFile})")
+        new URL(getDownloadLink().get()).withInputStream { downloadInputStream -> getDownloadTargetFile().get().asFile.withOutputStream { it << downloadInputStream } }
+    }
+}
+
+task downloadMpsZip(type: DownloadFileTask) {
     group 'mps-download'
     onlyIf {
-        !mpsZipFile.exists() ||
-        mpsPlugins.any { !file("$pluginsDirectory/mps-${getEffectivePluginName(it.key)}.zip").exists() } ||
-        project.hasProperty("customMpsPlugins") && customMpsPlugins.any { !file("$pluginsDirectory/mps-${it.key}.zip").exists() }
+        !mpsZipFile.exists()
     }
-    doLast {
-        if (!mpsZipFile.exists()) {
-            mpsZipFile.parentFile.mkdirs()
-            def mpsDownloadLink = "https://download.jetbrains.com/mps/$mpsMajorMinorVersion/MPS-${mpsVersion}.zip"
-            println("downloading $mpsDownloadLink ... (might take few minutes, since it is ca. 400-500 MB)")
-            new URL(mpsDownloadLink).withInputStream { downloadInputStream -> mpsZipFile.withOutputStream { it << downloadInputStream } }
-        }
+    downloadLink = "https://download.jetbrains.com/mps/$mpsMajorMinorVersion/MPS-${mpsVersion}.zip"
+    downloadTargetFile = mpsZipFile
+}
 
+task downloadMpsPlugins {
+    // The onlyIf is handeled on a per-plugin basis. Redoing all that logic here would be too much effort.
+    doLast {
         if (!mpsPlugins.isEmpty()) {
             downloadPlugins(pluginsDirectory)
         }
@@ -62,6 +75,11 @@ task downloadMpsAndPlugins {
             downloadCustomPlugins(pluginsDirectory)
         }
     }
+}
+
+task downloadMpsAndPlugins {
+    group 'mps-download'
+    dependsOn downloadMpsZip, downloadMpsPlugins
 }
 
 private def downloadPlugins(def pluginsDirectory) {
@@ -77,7 +95,7 @@ private def downloadPlugins(def pluginsDirectory) {
         def pluginName = getEffectivePluginName(it.key)
         def pluginId = it.value
         def pluginVersion = getEffectivePluginVersion(it.key, mpsVersion)
-        def pluginZipFile = file("$pluginsDirectory/mps-${pluginName}.zip")
+        def pluginZipFile = file("$pluginsDirectory/${getPluginDownloadFileName(pluginName, pluginVersion)}")
         if (!pluginZipFile.exists()) {
             pluginZipFile.parentFile.mkdirs()
             def pluginDownloadLink = obtainDownloadLinkForPlugin(pluginName, pluginId, pluginVersion)
@@ -85,6 +103,10 @@ private def downloadPlugins(def pluginsDirectory) {
             new URL(pluginDownloadLink).withInputStream { downloadInputStream -> pluginZipFile.withOutputStream { it << downloadInputStream } }
         }
     }
+}
+
+private static String getPluginDownloadFileName(String pluginName, String pluginVersion) {
+    return "mps-${pluginName}-${pluginVersion}.zip"
 }
 
 /*
@@ -111,13 +133,17 @@ private static String getEffectivePluginVersion(String configuredPluginName, Str
     return mpsVersion
 }
 
+private static String getCustomPluginDownloadFileName(String pluginName, String pluginLink) {
+    return "mps-${pluginName}-${pluginLink.md5()}.zip"
+}
+
 private def downloadCustomPlugins(def pluginsDirectory) {
     customMpsPlugins.each {
         def pluginName = it.key
-        def pluginZipFile = file("$pluginsDirectory/mps-${pluginName}.zip")
+        def pluginDownloadLink = it.value
+        def pluginZipFile = file("$pluginsDirectory/${getCustomPluginDownloadFileName(pluginName, pluginDownloadLink)}")
         if (!pluginZipFile.exists()) {
             pluginZipFile.parentFile.mkdirs()
-            def pluginDownloadLink = it.value
             println("downloading custom plugin from URL $pluginDownloadLink ... ($pluginName)")
             new URL(pluginDownloadLink).withInputStream { downloadInputStream -> pluginZipFile.withOutputStream { it << downloadInputStream } }
         }
@@ -149,9 +175,21 @@ task buildMpsZipBundle {
 
         def outputDependenciesDirectory = file("$outputBundleDirectory/dependencies")
         copy {
-            fileTree(dir: pluginsDirectory, includes: ['**/*.zip']).each { zipFile ->
-                println("unzipping $zipFile into $targetFolderName/plugins")
-                from zipTree(zipFile)
+            mpsPlugins.each {
+                def pluginName = getEffectivePluginName(it.key)
+                def pluginVersion = getEffectivePluginVersion(it.key, mpsVersion)
+                def pluginZipFile = file("$pluginsDirectory/${getPluginDownloadFileName(pluginName, pluginVersion)}")
+                println("unzipping $pluginZipFile into $targetFolderName/plugins")
+                from zipTree(pluginZipFile)
+            }
+            if (project.hasProperty("customMpsPlugins")) {
+                customMpsPlugins.each {
+                    def pluginName = it.key
+                    def pluginDownloadLink = it.value
+                    def pluginZipFile = file("$pluginsDirectory/${getCustomPluginDownloadFileName(pluginName, pluginDownloadLink)}")
+                    println("unzipping $pluginZipFile into $targetFolderName/plugins")
+                    from zipTree(pluginZipFile)
+                }
             }
             into outputDependenciesDirectory
         }
@@ -226,7 +264,7 @@ private static String obtainUpdateIdForPlugin(String pluginName, int pluginId, S
     }
 }
 
-task downloadJbrForCurrentPlatform {
+task downloadJbrForCurrentPlatform(type: DownloadFileTask) {
     group 'mps-download'
 
     def currentOs = getOsJbrVariantName()
@@ -239,15 +277,11 @@ task downloadJbrForCurrentPlatform {
     onlyIf {
         !jbrTarGzFile.exists() && System.env.getOrDefault('PREINSTALLED_JAVA_PATH',"") == ""
     }
-    doLast {
-        def downloadLink = "https://cache-redirector.jetbrains.com/intellij-jbr/jbr_jcef-${jbrVersion[0]}-${currentOs}-${jbrVersion[1]}.tar.gz"
-        if (!jbrTarGzFile.exists()) {
-            jbrTarGzFile.parentFile.mkdirs()
-            println("downloading $downloadLink ... (to $jbrTarGzFile)")
-            new URL(downloadLink).withInputStream { downloadInputStream -> jbrTarGzFile.withOutputStream { it << downloadInputStream } }
-        }
-    }
+
+    downloadLink = "https://cache-redirector.jetbrains.com/intellij-jbr/jbr_jcef-${jbrVersion[0]}-${currentOs}-${jbrVersion[1]}.tar.gz"
+    downloadTargetFile = jbrTarGzFile
 }
+
 
 task extractJbrToMpsBundle {
     group 'mps-download'
@@ -325,12 +359,17 @@ task buildOsSpecificBundle {
 
 task cleanMpsBundle(type: Delete) {
     group 'mps-download'
-    delete file("build/download")
     delete file("$outputBundleDirectory")
 }
 
-if (project.tasks.findByName('clean')) {
-    clean.dependsOn cleanMpsBundle
+task cleanMpsDownloads(type: Delete) {
+    group 'mps-download'
+    delete file("build/download")
+}
+
+task cleanMpsBundleAndDownloads(type: Delete) {
+    group 'mps-download'
+    dependsOn cleanMpsBundle, cleanMpsDownloads
 }
 
 task listPlugins {
