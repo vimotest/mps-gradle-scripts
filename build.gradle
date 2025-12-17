@@ -2,7 +2,7 @@
   This is an example file, which demonstrates how the gradle helper scripts can be used
  */
 
-ext.mpsVersion = "2025.2.1"
+ext.mpsVersion = "2025.3"
 ext.languageName = "MyLanguage"
 
 // here add your required plugins
@@ -16,8 +16,9 @@ ext.mpsPlugins = [ "LangDoc[2025.1]": 12325 ]
                      "de.itemis.mps.grammarcells": 13242 ]*/
 
 // add plugins from custom URLs (which are not available in JetBrains' plugin repository)
+// see: https://artifacts.itemis.cloud/#browse/browse:maven-mps:de%2Fitemis%2Fmps%2Fextensions
 ext.customMpsPlugins = [
-        "de.itemis.mps.extensions": "https://artifacts.itemis.cloud/repository/maven-mps/de/itemis/mps/extensions/2025.1.3460.1d2fff5/extensions-2025.1.3460.1d2fff5.zip"
+        "de.itemis.mps.extensions": "https://artifacts.itemis.cloud/repository/maven-mps/de/itemis/mps/extensions/2025.1.3530.1fa4dbe/extensions-2025.1.3530.1fa4dbe.zip"
 ]
 
 apply from: 'gradle/init-gradle-scripts.gradle'
