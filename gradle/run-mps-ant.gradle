@@ -147,10 +147,13 @@ task mpsOpenProjectInMpsForCurrentOs(type: Exec) {
     environment "JAVA_HOME", "$projectDir/build/mps-bundle/mps/jbr/bin"
 
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        environment "MPS_VM_OPTIONS", "$projectDir/build/mps-bundle/mps/bin/mps64.exe.vmoptions"
         commandLine 'build/mps-bundle/mps/bin/mps.bat', projectDir
     } else if (Os.isFamily(Os.FAMILY_MAC)) {
+        environment "MPS_VM_OPTIONS", "$projectDir/build/mps-bundle/Contents/bin/mps64.vmoptions"
         commandLine 'build/mps-bundle/Contents/MacOS/mps', projectDir
     } else if (Os.isFamily(Os.FAMILY_UNIX)) {
+        environment "MPS_VM_OPTIONS", "$projectDir/build/mps-bundle/mps/bin/mps64.vmoptions"
         commandLine 'sh', 'build/mps-bundle/mps/bin/mps.sh', projectDir
     }
 }
